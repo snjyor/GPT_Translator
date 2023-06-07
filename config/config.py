@@ -13,16 +13,16 @@ class Config:
     # ES密码
     ELASTIC_PASSWORD = os.getenv("ELASTIC_PASSWORD")
     # 语料库ES索引
-    INDEX = "translation_material_1.0"
+    INDEX = ""
     # openai密钥
     openai.api_key = os.environ.get("OPENAI_API_KEY")
     # 是否用Azure的openai?
     USE_AZURE_AI = True
     # 如果是的话，还需要配置以下参数(有默认值不用配)
     if USE_AZURE_AI:
-        openai.api_type = os.getenv("AZURE_API_TYPE", "azure")
+        openai.api_type = os.getenv("AZURE_API_TYPE")
         openai.api_base = os.getenv("AZURE_API_BASE")
-        openai.api_version = os.getenv("AZURE_API_VERSION", "2023-03-15-preview")
+        openai.api_version = os.getenv("AZURE_API_VERSION")
     # 默认使用Azure openai的gpt35模型，可选的模型名有gpt35,gpt4-8k,gpt4-32k,davinci
     AZURE_GPT_ENGINE = "gpt35"
     # 单次翻译文本限制长度, 这是对用户输入的文本长度而言

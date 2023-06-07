@@ -1,8 +1,3 @@
-"""
-基于 OpenAI 的人工智能翻译
-使用stanza来完成 NER 任务并使用 ES 来存储数据
-用到了术语库和记忆库匹配，让AI进行参考.
-"""
 import ast, sys, os
 import time
 import json
@@ -66,17 +61,15 @@ class AITranslator(Resource, BaseTranslator):
         """
         翻译主函数
         :param query: 待翻译的文本
-        :return: 翻译结果, 翻译耗时, 提取到的实体名词, 术语库记忆库匹配结果
+        :return: 翻译结果
         """
-        start_time = time.time()
         cfg.MAX_TOKENS = cfg.ENGINE_TOKENS_MAPPING.get(cfg.AZURE_GPT_ENGINE, 4096)
         cfg.TEXT_TOKEN_LIMIT = cfg.MAX_TOKENS // 4
         text_list = utils.cut_text_as_short_as_possible(query)
         # 这种情况是句子长度不达限制，没有进行切分
         if len(text_list) == 1:
             # translate directly
-            reference, entities = self.vector_search(text_list[0])
-            self.construct_init_message(reference)
+            self.construct_init_message()
             self.add_message(f"```{text_list[0]}```", role="user")
             translation = utils.gpt_request(self.message)
             translated_text = self.get_translate_result(translation)
@@ -97,7 +90,7 @@ class AITranslator(Resource, BaseTranslator):
                 translation_item = self.part_translate(translate_text)
                 translated_text = f"{translated_text}{translation_item}"
 
-        return translated_text, time.time() - start_time
+        return translated_text
 
     def part_translate(self, translate_text):
         """
@@ -126,24 +119,6 @@ class AITranslator(Resource, BaseTranslator):
             return inner_result.get(self.target_lang)
         except Exception as e:
             return result
-
-    def vector_search(self, query, top_k=cfg.DEFAULT_TOP_K):
-        """
-        向量搜索，从术语记忆库中搜索相关数据
-        :param query: 待翻译的文本
-        :param top_k: 搜索结果的数量
-        """
-        sentence_vector = utils.embedding(query)
-        should_query = self.format_should_query([[]], "memory", sentence_vector)
-        memory_data = self.es.es_search(should_query, top_k=top_k)
-        if not cfg.IS_SEARCH_TERM_DATA:
-            all_entities = []
-        else:
-            all_entities = utils.get_entities_by_nltk(query) if self.fast_model else utils.get_entities(query)
-            term_data = self.entities_search(all_entities, top_k=len(all_entities))
-            memory_data.extend(term_data)
-        result = [{item["source_lang"]: item["source"], item["target_lang"]: item["target"]} for item in memory_data]
-        return result, all_entities
 
     def construct_init_message(self, reference=None):
         """
