@@ -1,2 +1,2 @@
 # TranslationSoftware
-GPT AI医学领域翻译
+GPT AI Translator
