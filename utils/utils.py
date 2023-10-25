@@ -6,7 +6,7 @@ import time
 from elasticsearch7 import Elasticsearch, helpers
 import tiktoken
 
-from config.translator_config import cfg
+from config.config import cfg
 
 
 def token_usage(text):

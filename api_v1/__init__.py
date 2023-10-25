@@ -1,4 +1,6 @@
-from api_v1.ai_translator import AITranslator, HumanFeedback, SupportLanguages
+from api_v1.ai_translator import AITranslator
+from api_v1.human_feedback import HumanFeedback
+from api_v1.support_languages import SupportLanguages
 
 
 def register_api_v1(api):
